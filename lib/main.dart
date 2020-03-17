@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import './widgets/new_transaction.dart';
-import './widgets/transaction_list.dart';
 import './models/transaction.dart';
 import './widgets/chart.dart';
+import './widgets/new_transaction.dart';
+import './widgets/transaction_list.dart';
 
 void main() {
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+//  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MyApp());
 }
 
@@ -47,6 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions {
     return this._transactions.where((transaction) {
@@ -114,15 +114,27 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: bodyHeight * 0.3,
-              child: Chart(this._recentTransactions),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Show Chart'),
+                Switch(
+                  value: this._showChart,
+                  onChanged: (val) =>
+                      this.setState(() => this._showChart = val),
+                ),
+              ],
             ),
-            Container(
-              height: bodyHeight * 0.7,
-              child:
-                  TransactionList(this._transactions, this._deleteTransaction),
-            )
+            this._showChart
+                ? Container(
+                    height: bodyHeight * 0.3,
+                    child: Chart(this._recentTransactions),
+                  )
+                : Container(
+                    height: bodyHeight * 0.7,
+                    child: TransactionList(
+                        this._transactions, this._deleteTransaction),
+                  )
           ],
         ),
       ),
