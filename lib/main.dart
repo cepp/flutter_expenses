@@ -92,6 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     final appBar = AppBar(
       title: Text(
         'Personal Expenses',
@@ -108,34 +111,41 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar.preferredSize.height -
         MediaQuery.of(context).padding.top);
 
+    final Widget transactionWidget = Container(
+      height: bodyHeight * 0.7,
+      child: TransactionList(this._transactions, this._deleteTransaction),
+    );
+
+    final Widget chartWidget = Container(
+      height: bodyHeight * (isLandscape ? 0.7 : 0.3),
+      child: Chart(this._recentTransactions),
+    );
+
+    final Widget switchWidget = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text('Show Chart'),
+        Switch(
+          value: this._showChart,
+          onChanged: (val) => this.setState(() => this._showChart = val),
+        ),
+      ],
+    );
+
+    final List<Widget> landscapeWidget = [
+      switchWidget,
+      this._showChart ? chartWidget : transactionWidget
+    ];
+    final List<Widget> portraitWidget = [chartWidget, transactionWidget];
+    final List<Widget> mainWidget =
+        isLandscape ? landscapeWidget : portraitWidget;
+
     return Scaffold(
       appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Show Chart'),
-                Switch(
-                  value: this._showChart,
-                  onChanged: (val) =>
-                      this.setState(() => this._showChart = val),
-                ),
-              ],
-            ),
-            this._showChart
-                ? Container(
-                    height: bodyHeight * 0.7,
-                    child: Chart(this._recentTransactions),
-                  )
-                : Container(
-                    height: bodyHeight * 0.7,
-                    child: TransactionList(
-                        this._transactions, this._deleteTransaction),
-                  )
-          ],
+          children: mainWidget,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
