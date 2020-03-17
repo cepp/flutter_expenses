@@ -50,7 +50,6 @@ class Chart extends StatelessWidget {
             double spendingPctOfTotal = this.maxSpending == 0.0
                 ? 0.0
                 : (data['amount'] as double) / this.maxSpending;
-
             return Flexible(
               fit: FlexFit.tight,
               child: ChartBar(
