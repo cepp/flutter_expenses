@@ -18,26 +18,30 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       home: MyHomePage(),
-      theme: ThemeData(
-          primarySwatch: Colors.purple,
-          accentColor: Colors.amber,
-          fontFamily: 'Quicksand',
+      theme: themeData(),
+    );
+  }
+
+  ThemeData themeData() {
+    return ThemeData(
+        primarySwatch: Colors.purple,
+        accentColor: Colors.amber,
+        fontFamily: 'Quicksand',
+        textTheme: ThemeData.light().textTheme.copyWith(
+              title: TextStyle(
+                  fontFamily: 'OpenSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
+              button: TextStyle(color: Colors.white),
+            ),
+        appBarTheme: AppBarTheme(
           textTheme: ThemeData.light().textTheme.copyWith(
                 title: TextStyle(
                     fontFamily: 'OpenSans',
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold),
-                button: TextStyle(color: Colors.white),
               ),
-          appBarTheme: AppBarTheme(
-            textTheme: ThemeData.light().textTheme.copyWith(
-                  title: TextStyle(
-                      fontFamily: 'OpenSans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                ),
-          )),
-    );
+        ));
   }
 }
 
@@ -140,7 +144,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final Widget switchWidget = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Text('Show Chart'),
+        Text(
+          'Show Chart',
+          style: Theme.of(context).textTheme.title,
+        ),
         Switch.adaptive(
           activeColor: Theme.of(context).accentColor,
           value: this._showChart,
