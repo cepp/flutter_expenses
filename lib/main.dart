@@ -96,11 +96,74 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Widget _switchWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Show Chart',
+          style: Theme.of(context).textTheme.title,
+        ),
+        Switch.adaptive(
+          activeColor: Theme.of(context).accentColor,
+          value: this._showChart,
+          onChanged: (val) => this.setState(() => this._showChart = val),
+        ),
+      ],
+    );
+  }
+
+  Widget _chartWidget(double bodyHeight, bool isLandscape) {
+    return Container(
+      height: bodyHeight * (isLandscape ? 0.7 : 0.3),
+      child: Chart(this._recentTransactions),
+    );
+  }
+
+  Widget _transactionWidget(double bodyHeight) {
+    return Container(
+      height: bodyHeight * 0.7,
+      child: TransactionList(this._transactions, this._deleteTransaction),
+    );
+  }
+
+  List<Widget> _buildLandscapeContent(double bodyHeight) {
+    return [
+      this._switchWidget(),
+      this._showChart
+          ? this._chartWidget(bodyHeight, true)
+          : this._transactionWidget(bodyHeight)
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(double bodyHeight) {
+    return [
+      this._chartWidget(bodyHeight, false),
+      this._transactionWidget(bodyHeight)
+    ];
+  }
+
+  List<Widget> _buildMainContent(double bodyHeight, bool isLandscape) {
+    return isLandscape
+        ? this._buildLandscapeContent(bodyHeight)
+        : this._buildPortraitContent(bodyHeight);
+  }
+
+  Widget _buildScaffoldBody(double bodyHeight, bool isLandscape) {
+    return SafeArea(
+        child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: this._buildMainContent(bodyHeight, isLandscape),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     var mediaQuery = MediaQuery.of(context);
     final bool isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final title = Text(
+    final title = const Text(
       'Personal Expenses',
     );
 
@@ -131,63 +194,20 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar.preferredSize.height -
         mediaQuery.padding.top);
 
-    final Widget transactionWidget = Container(
-      height: bodyHeight * 0.7,
-      child: TransactionList(this._transactions, this._deleteTransaction),
-    );
-
-    final Widget chartWidget = Container(
-      height: bodyHeight * (isLandscape ? 0.7 : 0.3),
-      child: Chart(this._recentTransactions),
-    );
-
-    final Widget switchWidget = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          'Show Chart',
-          style: Theme.of(context).textTheme.title,
-        ),
-        Switch.adaptive(
-          activeColor: Theme.of(context).accentColor,
-          value: this._showChart,
-          onChanged: (val) => this.setState(() => this._showChart = val),
-        ),
-      ],
-    );
-
-    final List<Widget> landscapeWidget = [
-      switchWidget,
-      this._showChart ? chartWidget : transactionWidget
-    ];
-    final List<Widget> portraitWidget = [chartWidget, transactionWidget];
-    final List<Widget> mainWidget =
-        isLandscape ? landscapeWidget : portraitWidget;
-
-    final Widget scaffoldBody = SafeArea(
-        child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: mainWidget,
-      ),
-    ));
-
-    final Widget scaffoldMaterial = Scaffold(
-      appBar: appBar,
-      body: scaffoldBody,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => this._startAddNewTransaction(context),
-      ),
-    );
-
-    final Widget scaffoldCupertino =
-        CupertinoPageScaffold(navigationBar: appBar, child: scaffoldBody);
-
-    final Widget scaffold =
-        Platform.isIOS ? scaffoldCupertino : scaffoldMaterial;
-
-    return scaffold;
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            navigationBar: appBar,
+            child: this._buildScaffoldBody(bodyHeight, isLandscape),
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: this._buildScaffoldBody(bodyHeight, isLandscape),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => this._startAddNewTransaction(context),
+            ),
+          );
   }
 }
