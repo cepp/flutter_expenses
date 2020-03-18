@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import './models/transaction.dart';
@@ -6,7 +9,6 @@ import './widgets/new_transaction.dart';
 import './widgets/transaction_list.dart';
 
 void main() {
-//  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(MyApp());
 }
 
@@ -92,24 +94,38 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-
-    final appBar = AppBar(
-      title: Text(
-        'Personal Expenses',
-      ),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.add),
-          onPressed: () => this._startAddNewTransaction(context),
-        )
-      ],
+    var mediaQuery = MediaQuery.of(context);
+    final bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final title = Text(
+      'Personal Expenses',
     );
 
-    final bodyHeight = (MediaQuery.of(context).size.height -
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: title,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  child: Icon(CupertinoIcons.add),
+                  onTap: () => this._startAddNewTransaction(context),
+                ),
+              ],
+            ),
+          )
+        : AppBar(
+            title: title,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () => this._startAddNewTransaction(context),
+              )
+            ],
+          );
+
+    final bodyHeight = (mediaQuery.size.height -
         appBar.preferredSize.height -
-        MediaQuery.of(context).padding.top);
+        mediaQuery.padding.top);
 
     final Widget transactionWidget = Container(
       height: bodyHeight * 0.7,
@@ -125,7 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text('Show Chart'),
-        Switch(
+        Switch.adaptive(
+          activeColor: Theme.of(context).accentColor,
           value: this._showChart,
           onChanged: (val) => this.setState(() => this._showChart = val),
         ),
@@ -140,19 +157,29 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Widget> mainWidget =
         isLandscape ? landscapeWidget : portraitWidget;
 
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: mainWidget,
-        ),
+    final Widget scaffoldBody = SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: mainWidget,
       ),
+    );
+
+    final Widget scaffoldMaterial = Scaffold(
+      appBar: appBar,
+      body: scaffoldBody,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () => this._startAddNewTransaction(context),
       ),
     );
+
+    final Widget scaffoldCupertino =
+        CupertinoPageScaffold(navigationBar: appBar, child: scaffoldBody);
+
+    final Widget scaffold =
+        Platform.isIOS ? scaffoldCupertino : scaffoldMaterial;
+
+    return scaffold;
   }
 }
