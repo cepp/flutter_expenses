@@ -157,12 +157,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final List<Widget> mainWidget =
         isLandscape ? landscapeWidget : portraitWidget;
 
-    final Widget scaffoldBody = SingleChildScrollView(
+    final Widget scaffoldBody = SafeArea(
+        child: SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: mainWidget,
       ),
-    );
+    ));
 
     final Widget scaffoldMaterial = Scaffold(
       appBar: appBar,
